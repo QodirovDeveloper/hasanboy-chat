@@ -152,19 +152,3 @@ img {
   border-radius: 50%;
   margin: 2px 5px;
 }
-.message {
-  display: flex;
-  align-items: center;
-  margin: 10px;
-}
-.message.sent {
-  justify-content: flex-end;
-}
-.message.received {
-  justify-content: flex-start;
-}
-.message img {
-  width: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
