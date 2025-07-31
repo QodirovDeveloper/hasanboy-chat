@@ -6,7 +6,6 @@ import "firebase/compat/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
-// Firebase config
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey: "AIzaSyBETJWBYqL7GoEFJBaGf62098bBbGIiXRs",
@@ -25,12 +24,14 @@ function App() {
   const [user] = useAuthState(auth);
 
   return (
-    <div className="App">
-      <header>
-        <h1>💬 Chat</h1>
+    <div className="bg-gray-100 min-h-screen flex flex-col items-center">
+      <header className="w-full bg-white shadow p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-blue-600">💬 Chat App</h1>
         <SignOut />
       </header>
-      <section>{user ? <ChatRoom /> : <SignIn />}</section>
+      <section className="w-full max-w-2xl mt-4 p-4">
+        {user ? <ChatRoom /> : <SignIn />}
+      </section>
     </div>
   );
 }
@@ -41,13 +42,27 @@ function SignIn() {
     auth.signInWithPopup(provider);
   };
 
-  return <button onClick={signInWithGoogle}>Sign in with Google</button>;
+  return (
+    <div className="flex justify-center">
+      <button
+        onClick={signInWithGoogle}
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow"
+      >
+        Sign in with Google
+      </button>
+    </div>
+  );
 }
 
 function SignOut() {
   return (
     auth.currentUser && (
-      <button onClick={() => auth.signOut()}>Sign Out</button>
+      <button
+        onClick={() => auth.signOut()}
+        className="text-sm bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1 rounded"
+      >
+        Sign Out
+      </button>
     )
   );
 }
@@ -55,7 +70,7 @@ function SignOut() {
 function ChatRoom() {
   const dummy = useRef();
   const messagesRef = firestore.collection("messages");
-  const query = messagesRef.orderBy("createdAt").limit(25);
+  const query = messagesRef.orderBy("createdAt").limit(50);
   const [messages] = useCollectionData(query, { idField: "id" });
   const [formValue, setFormValue] = useState("");
 
@@ -66,7 +81,7 @@ function ChatRoom() {
     await messagesRef.add({
       text: formValue,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid, // REQUIRED: must match request.auth.uid
+      uid,
       photoURL,
     });
 
@@ -76,22 +91,29 @@ function ChatRoom() {
 
   return (
     <>
-      <main>
+      <main className="flex flex-col gap-2 mb-4 h-[60vh] overflow-y-auto p-2 bg-white rounded shadow">
         {messages &&
-          messages.map((msg, index) => (
-            <ChatMessage key={msg.id || index} message={msg} />
+          messages.map((msg, idx) => (
+            <ChatMessage key={msg.id || idx} message={msg} />
           ))}
         <div ref={dummy}></div>
       </main>
 
-      <form onSubmit={sendMessage}>
+      <form
+        onSubmit={sendMessage}
+        className="flex gap-2 items-center bg-white p-3 rounded shadow"
+      >
         <input
           value={formValue}
           onChange={(e) => setFormValue(e.target.value)}
-          placeholder="Type your message"
-          autoFocus
+          className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          placeholder="Type your message..."
         />
-        <button type="submit" disabled={!formValue.trim()}>
+        <button
+          type="submit"
+          disabled={!formValue.trim()}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        >
           🕊
         </button>
       </form>
@@ -101,12 +123,28 @@ function ChatRoom() {
 
 function ChatMessage(props) {
   const { text, uid, photoURL } = props.message;
-  const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
+  const messageClass = uid === auth.currentUser.uid ? "justify-end" : "justify-start";
+  const bubbleColor = uid === auth.currentUser.uid ? "bg-blue-500 text-white" : "bg-gray-200";
 
   return (
-    <div className={`message ${messageClass}`}>
-      <img src={photoURL || "/default-avatar.png"} alt="avatar" />
-      <p>{text}</p>
+    <div className={`flex ${messageClass}`}>
+      <div className="flex items-end max-w-xs gap-2 mb-2">
+        {uid !== auth.currentUser.uid && (
+          <img
+            src={photoURL || "/default-avatar.png"}
+            alt="avatar"
+            className="w-8 h-8 rounded-full"
+          />
+        )}
+        <p className={`px-4 py-2 rounded-lg text-sm ${bubbleColor}`}>{text}</p>
+        {uid === auth.currentUser.uid && (
+          <img
+            src={photoURL || "/default-avatar.png"}
+            alt="avatar"
+            className="w-8 h-8 rounded-full"
+          />
+        )}
+      </div>
     </div>
   );
 }
