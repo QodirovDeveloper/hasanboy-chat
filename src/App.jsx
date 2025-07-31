@@ -5,6 +5,7 @@ import "firebase/compat/auth";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
+import { BiLogoTelegram } from "react-icons/bi";
 
 if (!firebase.apps.length) {
   firebase.initializeApp({
@@ -114,7 +115,9 @@ function ChatRoom() {
           disabled={!formValue.trim()}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
-          🕊
+          <BiLogoTelegram />
+
+          {/* 🕊 */}
         </button>
       </form>
     </>
